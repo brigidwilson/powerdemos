@@ -1,0 +1,43 @@
+---
+title: "Power Analysis for Interaction Effect in a Two-Way Anova"
+author: "Brigid Wilson"
+date: "September, 2014"
+output: html_document
+---
+
+We are interested in the power to detect an interaction effect between 2 two-level variables in an ANOVA. We assume a common variance across the four cells. As a starting point, we can consider the power to detect this difference if there are 10 replicates for a total of n = 40.
+
+```{r}
+ndf = 1
+ddf = 36
+m = c(5,8,7,3)
+sd = 4
+f1 = as.factor(rep(c(1,2),2))
+f2 = as.factor(c(1,1,2,2))
+SS1 = 10*anova(lm(m~f1*f2))[3,2]
+SS2 = sd**2
+ncp = SS1/SS2
+power = pf(qf(.95,ndf,ddf),ndf,ddf,ncp,lower=F)
+print(power)
+```
+
+This matches the results seen using G*Power with a generic F test, specifying the degrees of freedom and the non-centrality parameter ("ncp" in the code above).  
+
+Even without these formulas, we can assess the power by randomly sampling according to this assumed setup, then tallying how many of the interaction effects in the ANOVA models are significant at our specified alpha.
+
+```{r}
+means = c(5, 8, 7, 3)
+sd = 4
+
+pvals = rep(NA, 1000)
+for (i in 1:1000){
+  simdat = unlist(tapply(means, 1:length(means), function(x) rnorm(x, sd, n = 10)))
+  f1 = as.factor(c(rep(1, 20), rep(2, 20)))
+	f2 = as.factor(rep(c(rep(1, 10), rep(2, 10)), 2))
+	pval = anova(lm(simdat~f1*f2))[3,5]
+	pvals[i] = pval
+}
+mean(pvals < .05)  
+```
+
+This simulation value is consistent with the returned value from our earlier snippet and G*Power.
