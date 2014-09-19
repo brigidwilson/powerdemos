@@ -1,0 +1,36 @@
+---
+title: "Tests of Proportions"
+author: "Brigid Wilson"
+date: "September, 2014"
+output: html_document
+---
+
+R functions can be used to calculate achieved power or required samples size for tests of proportions across indepdendent samples. 
+```{r}
+power.prop.test(n = 25, p1 = 0.28, p2 = 0.52, sig.level = 0.05,
+                power = NULL,
+                alternative = "two.sided")
+
+```
+
+This result matches the power calculated using G*Power Exact Tests of Proportions, assuming large sample approximation for testing the inequality of proportions with unconstrained margins. 
+
+```{r}
+power.prop.test(n = NULL, p1 = 0.28, p2 = 0.52, sig.level = 0.05,
+                power = 0.8,
+                alternative = "two.sided")
+```
+
+The code above calculates the number of subjects required per group. The power.prop.test assumes equal group size, but a simple simulation can be written to match these results and estimate achieved power with different groups sizes.
+
+ADD IN SIMULATION
+
+If margins are constrained (both the split of observations into the two groups and the number of outcomes are fixed), then the power.fisher.test in the statmod package can be used.
+
+```{r}
+library(statmod)
+set.seed(1234)
+power.fisher.test(.28, .52, 25, 25, alpha=0.05, nsim=10000, alternative="two.sided")
+```
+
+Though this is an exact result from 10000 simulated grids, the result is consistent with the G*Power result for Fisher's exact test using these fixed group sizes and observed proportions.  
